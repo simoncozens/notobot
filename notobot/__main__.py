@@ -115,66 +115,51 @@ async def answer_question(gh, question):
     return message
 
 
-async def main():
-    async with aiohttp.ClientSession() as session:
-        gh = gh_aiohttp.GitHubAPI(session, username, oauth_token=oauth_token)
-        print(
-            await answer_question(
-                gh,
-                "@notobot, regression test سبے with NotoNastaliqUrdu/NotoNastaliqUrdu-Regular.ttf",
-            )
-        )
-
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
-
-
 # print(
 #     answer_question("@notobot, regression test سبے with NotoNastaliqUrdu-Regular.ttf")
 # )
 
-# routes = web.RouteTableDef()
+routes = web.RouteTableDef()
 
 
-# @router.register("issue_comment", action="created")
-# async def issue_comment_event(event, gh, *args, **kwargs):
-#     print("Issue comment created")
-#     print(event.data)
-#     url = event.data["issue"]["comments_url"]
-#     message = answer_question(event.data["comment"]["body"])
-#     if message:
-#         await gh.post(url, data={"body": message})
-#     pass
+@router.register("issue_comment", action="created")
+async def issue_comment_event(event, gh, *args, **kwargs):
+    print("Issue comment created")
+    print(event.data)
+    url = event.data["issue"]["comments_url"]
+    message = await answer_question(gh, event.data["comment"]["body"])
+    if message:
+        await gh.post(url, data={"body": message})
+    pass
 
 
-# @routes.post("/")
-# async def main(request):
-#     # read the GitHub webhook payload
-#     body = await request.read()
+@routes.post("/")
+async def main(request):
+    # read the GitHub webhook payload
+    body = await request.read()
 
-#     # our authentication token and secret
-#     secret = os.environ.get("GH_SECRET")
-#     oauth_token = os.environ.get("GH_AUTH")
+    # our authentication token and secret
+    secret = os.environ.get("GH_SECRET")
+    oauth_token = os.environ.get("GH_AUTH")
 
-#     # a representation of GitHub webhook event
-#     event = sansio.Event.from_http(request.headers, body, secret=secret)
+    # a representation of GitHub webhook event
+    event = sansio.Event.from_http(request.headers, body, secret=secret)
 
-#     async with aiohttp.ClientSession() as session:
-#         gh = gh_aiohttp.GitHubAPI(session, username, oauth_token=oauth_token)
+    async with aiohttp.ClientSession() as session:
+        gh = gh_aiohttp.GitHubAPI(session, username, oauth_token=oauth_token)
 
-#         # call the appropriate callback for the event
-#         await router.dispatch(event, gh)
+        # call the appropriate callback for the event
+        await router.dispatch(event, gh)
 
-#     # return a "Success"
-#     return web.Response(status=200)
+    # return a "Success"
+    return web.Response(status=200)
 
 
-# if __name__ == "__main__":
-#     app = web.Application()
-#     app.add_routes(routes)
-#     port = os.environ.get("PORT")
-#     if port is not None:
-#         port = int(port)
+if __name__ == "__main__":
+    app = web.Application()
+    app.add_routes(routes)
+    port = os.environ.get("PORT")
+    if port is not None:
+        port = int(port)
 
-#     web.run_app(app, port=port)
+    web.run_app(app, port=port)
