@@ -124,7 +124,7 @@ async def answer_question(gh, question):
 routes = web.RouteTableDef()
 
 
-@router.register("issue_comment", action="created")
+@router.register("issue_comment")
 async def issue_comment_event(event, gh, *args, **kwargs):
     print("Issue comment created")
     print(event.data)
@@ -147,7 +147,7 @@ async def main(request):
 
     # a representation of GitHub webhook event
     event = sansio.Event.from_http(request.headers, body, secret=secret)
-    print(event)
+    print(body)
 
     async with aiohttp.ClientSession() as session:
         gh = gh_aiohttp.GitHubAPI(session, username, oauth_token=oauth_token)
