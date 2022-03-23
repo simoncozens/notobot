@@ -90,9 +90,11 @@ async def get_version(gh, pair):
 
 async def answer_question(gh, question):
     if not "@notobot" in question:
+        print("Not for me!")
         return
     m = re.search("regression test (.*) with (.*)", question)
     if not m:
+        print(f"Couldn't parse question |{question}|!")
         return
     string, file = m[1], m[2]
 
@@ -137,6 +139,7 @@ async def issue_comment_event(event, gh, *args, **kwargs):
 async def main(request):
     # read the GitHub webhook payload
     body = await request.read()
+    print("Got a thing:")
 
     # our authentication token and secret
     secret = os.environ.get("GH_SECRET")
@@ -144,6 +147,7 @@ async def main(request):
 
     # a representation of GitHub webhook event
     event = sansio.Event.from_http(request.headers, body, secret=secret)
+    print(event)
 
     async with aiohttp.ClientSession() as session:
         gh = gh_aiohttp.GitHubAPI(session, username, oauth_token=oauth_token)
