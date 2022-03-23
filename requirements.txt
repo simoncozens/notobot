@@ -1,0 +1,7 @@
+Pillow
+cloudinary
+aiohttp
+cairosvg
+vharfbuzz
+gidgethub
+pygit2
