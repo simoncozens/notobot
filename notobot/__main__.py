@@ -11,6 +11,7 @@ from PIL import Image, ImageOps
 import cloudinary.uploader
 import re
 import aiohttp
+import threading
 
 from gidgethub import routing, sansio
 from gidgethub import aiohttp as gh_aiohttp
@@ -18,8 +19,25 @@ from gidgethub import aiohttp as gh_aiohttp
 router = routing.Router()
 username = "simoncozens"
 
+
+class MyRemoteCallbacks(pygit2.RemoteCallbacks):
+    def transfer_progress(self, stats):
+        if stats.indexed_objects % 100 == 0:
+            print(f"{stats.indexed_objects}/{stats.total_objects}")
+
+
+def clone_repo():
+    print("Checking out Noto repo")
+    pygit2.clone_repository(
+        "https://github.com/googlefonts/noto-fonts",
+        "notofonts",
+        callbacks=MyRemoteCallbacks(),
+    )
+
+
 if not os.path.isdir("notofonts"):
-    pygit2.clone_repository("https://github.com/googlefonts/noto-fonts", "notofonts")
+    download_thread = threading.Thread(target=clone_repo, name="Clone")
+    download_thread.start()
 
 
 def shape_all_versions(path, string):
