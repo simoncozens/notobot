@@ -51,8 +51,8 @@ async def shape_this_blob(string, blob, commit):
         new_image.thumbnail((600, 400), Image.ANTIALIAS)
         img_byte_arr = io.BytesIO()
         new_image.save(img_byte_arr, format="PNG")
-        # upload = cloudinary.uploader.upload(img_byte_arr.getvalue())
-        # s["url"] = upload["url"]
+        upload = cloudinary.uploader.upload(img_byte_arr.getvalue())
+        s["url"] = upload["url"]
     return s
 
 
@@ -110,7 +110,9 @@ async def answer_question(gh, question):
     message = "Here's your regression log:\n\n"
 
     for ix, s in enumerate(shaped):
-        message += f"## {file} {s['version']} @ {s['commit']}\n\n"
+        message += (
+            f"## {os.path.basename(file)} {s['version']} @ {s['commit'][0:7]}\n\n"
+        )
         message += f"`{s['shaping']}`\n\n"
         if "url" in s:
             message += f"<img src=\"{s['url']}\">\n\n"
